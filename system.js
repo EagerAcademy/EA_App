@@ -1,4 +1,9 @@
-//Rolling Yearly Cummitalive Events DONE
+import { Students } from './private/imports/api/students/students.js';
+import { Teachers } from './private/imports/api/teachers/teachers.js';
+import { Courses } from './private/imports/api/courses/courses.js';
+import { Assignments } from './private/imports/api/assignments/assignments.js';
+
+ //Rolling Yearly Cummitalive Events DONE
 //Q1'14-Q1'15 -> Q2'14-Q2'15 DONE
 //Bill, Mark, Dan, Vince - SMS App Icon
 //Jan 6 - Finalize Report Function and check on outstanding suppliers not yet registered
@@ -8,6 +13,9 @@
 
 //This is to debug the schema's errors from validation
 //SimpleSchema.debug = true;
+
+//Collection of Student, Teacher, Course, and Assignment objects
+
 
 //Collection of Company Objects
 CompaniesTest = new Mongo.Collection("companies_Test");
@@ -789,6 +797,15 @@ EventsTest.attachSchema(EventSchema);
 Router.configure({
     layoutTemplate: 'main'
 });
+
+if (Meteor.isClient){
+  Meteor.subscribe('Students');
+  Meteor.subscribe('Teachers');
+  Meteor.subscribe('Courses');
+  Meteor.subscribe('Assignments');
+  
+}
+// TEMPLATE
 //Client Side Information
 if (Meteor.isClient) {
     //Clients are able to access MongoDB Collections with permissions
