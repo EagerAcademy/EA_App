@@ -9,11 +9,15 @@
 //This is to debug the schema's errors from validation
 //SimpleSchema.debug = true;
 
+
 //Collection of Company Objects
 CompaniesTest = new Mongo.Collection("companies_Test");
 
 //Collection of Events Objects
 EventsTest = new Mongo.Collection("events_Test");
+
+//Collection of Student Objects
+StudentCollection = new Mongo.Collection("students");
 
 //Company Schema used for validation and templating
 CompaniesSchema = new SimpleSchema({
@@ -778,6 +782,349 @@ EventSchema = new SimpleSchema({
     }
 });
 
+//Student Schema used for validation and templating
+StudentSchema = new SimpleSchema({
+    _id: {
+        type: String,
+        // regEx: SimpleSchema.regEx.Id,
+    },
+    firstName: {
+        type: String,
+        label: "First Name",
+        max: 30
+    },
+    lastName: {
+        type: String,
+        label: "Last Name",
+        max: 30
+    },
+    password: {
+        type: String,
+        label: "Password",
+        max: 30,
+        //Encryption / Hashing ??
+    },
+    email: {
+        type: String,
+        label: "E-Mail",
+        regEx: SimpleSchema.RegEx.Email,
+        unique: true,
+        max: 50,
+    },
+    points: {
+        type: Number,
+        label: "Current Points",
+        defaultValue: 0,
+    },
+    courseSchedule: {
+        type: [Object],
+        label: "Courses"
+
+    },
+    studentID: {
+        type: String,
+        label: "Student ID",
+        unique: true
+    },
+    companyName: {
+        type: String,
+        label: "Company Name",
+        autoform: {
+            firstOption: "(Select a Company)",
+            options: function () {
+                return CompaniesTest.find().map(function (c) {
+                    return {label: c.companyName, value: c.companyName};
+                })
+            }
+        }
+    },
+    eventDate: {
+        type: Date,
+        label: "Event Date",
+        autoValue: function () {
+            var tempDate = this.field("eventDate").value;
+            return tempDate;
+        }
+    },
+    eventType: {
+        type: String,
+        label: "Event Type",
+        autoform: {
+            firstOption: "(Select an Event Type)",
+            options: function () {
+                return [
+                    {label: "Quality", value: "Quality"},
+                    {label: "Delivery", value: "Delivery"}
+                ];
+            }
+        }
+    },
+    tlPartNumber: {
+        type: String,
+        label: "T&L Part Number"
+    },
+    purchaseOrderNumber: {
+        type: String,
+        label: "Purchase Order Number"
+    },
+    lotNumber: {
+        type: String,
+        label: "Lot Number"
+    },
+    carNumber: {
+        type: String,
+        label: "CAR Number"
+    },
+    quantityReject: {
+        type: Number,
+        label: "Quantity Rejected",
+        optional: true,
+        custom: function () {
+            if (Meteor.isClient) {
+                console.log(this.field("quantityReject"));
+                var shouldBeRequired = this.field('eventType').value;
+                if (shouldBeRequired == "Quality") {
+                    // inserts
+                    if (!this.operator) {
+                        if (!this.isSet || this.value === null || this.value === "") return "required";
+                    }
+                    // updates
+                    else if (this.isSet) {
+                        if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return "required";
+                        if (this.operator === "$unset") return "required";
+                        if (this.operator === "$rename") return "required";
+                    }
+                }
+            }
+        },
+        autoform: {
+            type: function () {
+                if (AutoForm.getFieldValue("eventType") != "Quality") {
+
+                    return "hidden";
+                }
+            }
+        },
+        autoValue: function () {
+            var type = this.siblingField("eventType");
+            var content = this.siblingField("quantityReject");
+            console.log(type.value);
+            console.log(content.value);
+            if (type.value == "Quality") {
+                console.log(this.operator);
+                console.log(!this.operator);
+                console.log(this.isSet);
+                //insert
+                if (!this.operator) {
+                    if (!this.isSet || this.value === null || this.value === "") {
+                        console.log("15");
+                        return content.value;
+                    }
+                }
+                // updates
+                else if (this.isSet) {
+                    if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return content.value;
+                }
+                else {
+                    return content.value;
+                }
+            }
+            else if (type.value == "Delivery") {
+                if (this.operator) {
+                    if (this.isSet || this.value === null || this.value === "") {
+                        console.log("7");
+                        return {$unset: ''};
+                    }
+                }
+                // updates
+                else if (!this.isSet) {
+                    if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return content.value;
+                }
+                else {
+                    return content.value;
+                }
+            }
+
+        }
+    },
+    requiredDate: {
+        type: Date,
+        label: "Required Delivery Date",
+        optional: true,
+        custom: function () {
+            if (Meteor.isClient) {
+                console.log(this.field("requiredDate"));
+                var shouldBeRequired = this.siblingField('eventType').value;
+                if (shouldBeRequired == "Delivery") {
+                    // inserts
+                    if (!this.operator) {
+                        if (!this.isSet || this.value === null || this.value === "") return "required";
+                    }
+                    // updates
+                    else if (this.isSet) {
+
+                        if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return "required";
+                        if (this.operator === "$unset") return "required";
+                        if (this.operator === "$rename") return "required";
+                    }
+                }
+            }
+        },
+        autoform: {
+            type: function () {
+                if (AutoForm.getFieldValue("eventType") != "Delivery") {
+                    return "hidden";
+                }
+            }
+        },
+        autoValue: function () {
+            var type = this.siblingField("eventType");
+            var content = this.siblingField("requiredDate");
+            console.log(type.value);
+            console.log(content.value);
+            if (type.value == "Delivery") {
+                console.log(this.operator);
+                console.log(!this.operator);
+                console.log(this.isSet);
+                //insert
+                if (!this.operator) {
+                    if (!this.isSet || this.value === null || this.value === "") {
+                        console.log("7");
+                        return content.value;
+                    }
+                }
+                // updates
+                else if (this.isSet) {
+                    if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return content.value;
+                }
+                else {
+                    return content.value;
+                }
+            }
+            else if (type.value == "Quality") {
+                console.log(this.operator);
+                console.log(!this.operator);
+                console.log(this.isSet);
+                //insert
+                if (this.operator) {
+                    if (!this.isSet || this.value === null || this.value === "") {
+                        console.log("15");
+                        return {$unset: ''};
+                    }
+                }
+                // updates
+                else if (!this.isSet) {
+                    if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return content.value;
+                }
+                else {
+                    return content.value;
+                }
+            }
+
+        }
+    },
+    actualDate: {
+        type: Date,
+        label: "Actual Delivery Date",
+        optional: true,
+        custom: function () {
+            if (Meteor.isClient) {
+                console.log(this.field("actualDate"));
+                var shouldBeRequired = this.siblingField('eventType').value;
+                if (shouldBeRequired == "Delivery") {
+                    // inserts
+                    if (!this.operator) {
+                        if (!this.isSet || this.value === null || this.value === "") return "required";
+                    }
+                    // updates
+                    else if (this.isSet) {
+                        if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return "required";
+                        if (this.operator === "$unset") return "required";
+                        if (this.operator === "$rename") return "required";
+                    }
+                }
+            }
+        },
+        autoform: {
+            type: function () {
+                if (AutoForm.getFieldValue("eventType") != "Delivery") {
+                    return "hidden";
+                }
+            }
+        },
+        autoValue: function () {
+            var type = this.siblingField("eventType");
+            var content = this.siblingField("requiredDate");
+            console.log(type.value);
+            console.log(content.value);
+            if (type.value == "Delivery") {
+                console.log(this.operator);
+                console.log(!this.operator);
+                console.log(this.isSet);
+                //insert
+                if (!this.operator) {
+                    if (!this.isSet || this.value === null || this.value === "") {
+                        console.log("7");
+                        return content.value;
+                    }
+                }
+                // updates
+                else if (this.isSet) {
+                    if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return content.value;
+                }
+                else {
+                    return content.value;
+                }
+            }
+            else if (type.value == "Quality") {
+                console.log(this.operator);
+                console.log(!this.operator);
+                console.log(this.isSet);
+                //insert
+                if (this.operator) {
+                    if (!this.isSet || this.value === null || this.value === "") {
+                        console.log("15");
+                        return {$unset: ''};
+                    }
+                }
+                // updates
+                else if (!this.isSet) {
+                    if (this.operator === "$set" && this.value === null || this.value === "" || this.value === undefined) return content.value;
+                }
+                else {
+                    return content.value;
+                }
+            }
+        }
+    },
+    rootCause: {
+        type: String,
+        label: "Root Cause"
+    },
+    statusOption: {
+        type: String,
+        label: "Status",
+        autoform: {
+            firstOption: "(Select a Status)",
+            options: function () {
+                return [
+                    {label: "Open", value: 1},
+                    {label: "Pending", value: 0},
+                    {label: "Closed", value: -1}
+                ];
+            }
+        }
+    }
+});
+
+//Course Schema used for validation and templating
+CourseSchema = new SimpleSchema({
+    className: {
+        type: String,
+        max: 100,
+
+    }
+});
 //Assigns Company Collection to specific Company Schema
 CompaniesTest.attachSchema(CompaniesSchema);
 

@@ -45,12 +45,15 @@ Courses.deny({
 });
 
 Courses.schema = new SimpleSchema({
+  //Done Porting Name
   name: { type: String, },
+  //Done Porting Internal_ID
   _id: {
     type: String,
     regEx: SimpleSchema.RegEx.Id,
     denyUpdate: true,
   },
+  //Done Port Course ID
   courseId: { //Unique course identifier the teacher is associated with
     type: String,
     regEx: SimpleSchema.RegEx.Id,
