@@ -64,7 +64,6 @@ Students.schema = new SimpleSchema({
   },
   courseSchedule: { type: [Courses],} //Courses a student is currently enrolled in; cleared when course complete
 });
-
 Teachers.schema = new SimpleSchema({
   _id: { //Unique school identifier the teacher associated with
     type: String,
@@ -112,7 +111,6 @@ Teachers.schema = new SimpleSchema({
   },
   classroom: { type: [Students], },
 });
-
 Courses.schema = new SimpleSchema({
   name: { type: String, },
   _id: {
@@ -145,7 +143,6 @@ Courses.schema = new SimpleSchema({
     minCount: 1,
   },
 });
-
 Assignments.schema = new SimpleSchema({
   _id: {
     type: String,
@@ -196,7 +193,9 @@ AssignmentsCollection.attachSchema(Assignments.schema);
 
 
 /*
-//TEMPLATE
+* START
+** TEMPLATE
+** DB & SCHEMA
 */
 //Collection of Company Objects
 CompaniesTest = new Mongo.Collection("companies_Test");
@@ -972,6 +971,10 @@ CompaniesTest.attachSchema(CompaniesSchema);
 
 //Assigns Events Collection to specific Company Schema
 EventsTest.attachSchema(EventSchema);
+/*
+** END
+*/
+
 
 
 //Configures the main layout of Web App
@@ -986,6 +989,67 @@ if (Meteor.isClient){
   Meteor.subscribe('Assignments');
   
 }
+
+if (Meteor.isServer) {
+  Meteor.startup(function () {
+    console.log("Server Side Startup Initialized");
+    console.log("Active Users: " + Meteor.users.findOne());
+    if (!Meteor.users.findOne()) {
+      console.log("Creating User Accounts");
+      var users = [
+        {name: "Admin User", username: "admin", roles: ['admin']},
+        {name: "Teacher User", username: "teacher", roles: ['admin', 'teacher']},
+        {name: "Student User", username: "student", roles: ['admin', 'student']},
+      ];
+      _.each(users, function (user) {
+        if (user.username == "admin") {
+            var id = Accounts.createUser({
+                username: user.username,
+                password: "eaadmin",
+                profile: {name: user.name}
+            });
+            if (user.roles.length > 0) {
+                // Need _id of existing user record so this call must come
+                // after `Accounts.createUser` or `Accounts.onCreate`
+                Roles.addUsersToRoles(id, user.roles, Roles.GLOBAL_GROUP);
+            }
+            console.log(user.username + " Account Created");
+        }
+
+        else if (user.username == "student") {
+            var id = Accounts.createUser({
+                username: user.username,
+                password: "eastudent",
+                profile: {name: user.name}
+            });
+            if (user.roles.length > 0) {
+                // Need _id of existing user record so this call must come
+                // after `Accounts.createUser` or `Accounts.onCreate`
+                Roles.addUsersToRoles(id, user.roles);
+            }
+            console.log(user.username + " Account Created");
+        }
+        else if (user.username == "teacher") {
+            var id = Accounts.createUser({
+                username: user.username,
+                password: "eateacher",
+                profile: {name: user.name}
+            });
+            if (user.roles.length > 0) {
+                // Need _id of existing user record so this call must come
+                // after `Accounts.createUser` or `Accounts.onCreate`
+                Roles.addUsersToRoles(id, user.roles);
+            }
+            console.log(user.username + " Account Created");
+        }
+      });
+    }
+    console.log("Server Initialization Complete");
+  });
+  
+  
+}
+
 // TEMPLATE
 //Client Side Information
 if (Meteor.isClient) {
