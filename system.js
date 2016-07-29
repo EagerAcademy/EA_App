@@ -15,8 +15,189 @@ import { Assignments } from './private/imports/api/assignments/assignments.js';
 //SimpleSchema.debug = true;
 
 //Collection of Student, Teacher, Course, and Assignment objects
+StudentsCollection = new Mongo.Collection('Students');
+TeachersCollection = new Mongo.Collection('Teachers');
+CoursesCollection = new Mongo.Collection('Courses');
+AssignmentsCollection = new Mongo.Collection('Assignments');
+
+Students.schema = new SimpleSchema({
+  _id: { //Unique student/user identifier within the system (Persistance of account between schools)
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  studentId: { //Unique student identifier relative to the school
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    label: "School defined student ID",
+    denyUpdate: false,
+  },
+  schoolId: { //Unique school identifier the student associated with
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: false,
+  },
+  firstName: {
+    type: String,
+    label: "First name",
+    max: 25,
+  },
+  lastName: {
+    type: String,
+    label: "Last name",
+    max: 35,
+  },
+  password: {
+    type: String,
+    max: 30,
+    //Encryption / Hashing ??
+  },
+  email: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Email,
+    max: 50,
+  },
+  points: {
+    type: Number,
+    label: "Current number of acquired points",
+    defaultValue: 0,
+  },
+  courseSchedule: { type: [Courses],} //Courses a student is currently enrolled in; cleared when course complete
+});
+
+Teachers.schema = new SimpleSchema({
+  _id: { //Unique school identifier the teacher associated with
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  teacherId: {//Unique teacher identifier the course associated with
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: false,
+  },
+  schoolId: { //Unique school identifier the teacher associated with
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: false,
+  },
+  formalName: {
+    type: String,
+    label: "Name referred to by students",
+    
+  },
+  firstName: {
+    type: String,
+    label: "First name",
+  },
+  lastName: {
+    type: String,
+    label: "Last name",
+    max: 35,
+  },
+  password: {
+    type: String,
+    max: 30,
+    //Encryption / Hashing ??
+  },
+  email: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Email,
+    max: 50,
+  },
+  courses: {
+    type: [Courses],
+    label: "Courses taught",
+    minCount: 1,
+  },
+  classroom: { type: [Students], },
+});
+
+Courses.schema = new SimpleSchema({
+  name: { type: String, },
+  _id: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  courseId: { //Unique course identifier the teacher is associated with
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  schoolId: { //Unique school identifier the course associated with
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  teacherId: {//Unique teacher identifier the course associated with
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  students: { type: [Students], },
+  studentCount: {
+    type: Number,
+    defaultValue: 0,
+  },
+  assignments: {
+    type: [Assignments],
+    minCount: 1,
+  },
+});
+
+Assignments.schema = new SimpleSchema({
+  _id: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  courseId: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Id,
+    denyUpdate: true,
+  },
+  submitterId: {
+    type: String,
+    egEx: SimpleSchema.RegEx.Id,
+    denyUpdate: false,
+  },
+  name: { type: String, },
+  startDate: {
+    type: Date,
+  },
+  dueDate: {
+    type: Date,
+  },
+  submissionDate: {
+    type: Date,
+  },
+  weight: {
+    type: Number,
+  },
+  grade: {
+    type: Number,
+  },
+  studentComments: {
+    type: String,
+    max: 500,
+  },
+  teacherComments: {
+    type: String,
+    max: 500,
+  },
+});
+
+StudentsCollection.attachSchema(Students.schema);
+TeachersCollection.attachSchema(Teachers.schema);
+CoursesCollection.attachSchema(Courses.schema);
+AssignmentsCollection.attachSchema(Assignments.schema);
 
 
+
+/*
+//TEMPLATE
+*/
 //Collection of Company Objects
 CompaniesTest = new Mongo.Collection("companies_Test");
 
