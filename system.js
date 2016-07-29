@@ -1,7 +1,7 @@
-import { Students } from './private/imports/api/students/students.js';
-import { Teachers } from './private/imports/api/teachers/teachers.js';
-import { Courses } from './private/imports/api/courses/courses.js';
-import { Assignments } from './private/imports/api/assignments/assignments.js';
+//import { Students } from './private/imports/api/students/students.js';
+//import { Teachers } from './private/imports/api/teachers/teachers.js';
+//import { Courses } from './private/imports/api/courses/courses.js';
+//import { Assignments } from './private/imports/api/assignments/assignments.js';
 
  //Rolling Yearly Cummitalive Events DONE
 //Q1'14-Q1'15 -> Q2'14-Q2'15 DONE
@@ -190,6 +190,42 @@ TeachersCollection.attachSchema(Teachers.schema);
 CoursesCollection.attachSchema(Courses.schema);
 AssignmentsCollection.attachSchema(Assignments.schema);
 
+StudentsCollection.publicFields = {
+  _id: 1,
+  studentId: 1,
+  schoolId: 1,
+  firstName: 1,
+  lastName: 1,
+  email: 1,
+  points: 1,
+  courseSchedule: 1,
+};
+TeachersCollection.publicFields = {
+  teacherId: 1,
+  schoolId: 1,
+  formalName: 1,
+  email: 1,
+  courses: 1,
+  classroom: 1,
+};
+CoursesCollection.publicFields = {
+  name: 1,
+  courseId: 1,
+  teacherId: 1,
+  studentCount: 1,
+  assignments: 1,
+};
+AssignmentsCollection.publicFields = {
+  _id: 1,
+  courseId: 1,
+  name: 1,
+  startDate: 1,
+  dueDate: 1,
+  studentComments: 1,
+  teacherComments: 1,
+  grade: 1,
+  weight: 1,
+};
 
 
 /*
@@ -976,7 +1012,9 @@ EventsTest.attachSchema(EventSchema);
 */
 
 
-
+/*
+** EA_APP
+*/
 //Configures the main layout of Web App
 Router.configure({
     layoutTemplate: 'main'
@@ -987,6 +1025,30 @@ if (Meteor.isClient){
   Meteor.subscribe('Teachers');
   Meteor.subscribe('Courses');
   Meteor.subscribe('Assignments');
+  
+  Template.login.events({
+    'submit form': function (event) {
+      console.log("Submit Button clicked");
+      event.preventDefault();
+      var usernameVar = event.target.loginUsername.value;
+      var passwordVar = event.target.loginPassword.value;
+      Meteor.loginWithPassword(usernameVar, passwordVar, function (error) {
+        if (error) {
+          alert(error.reason);
+        } else {
+          if (usernameVar == 'admin') {
+              Router.go('/admin');
+          }
+          else if (usernameVar == 'student') {
+              Router.go('/student-home')
+          }
+          else if (usernameVar == 'teacher') {
+              Router.go('/teacher-home');
+          }
+        }
+      });
+    }
+  }),
   
 }
 
@@ -1003,44 +1065,44 @@ if (Meteor.isServer) {
       ];
       _.each(users, function (user) {
         if (user.username == "admin") {
-            var id = Accounts.createUser({
-                username: user.username,
-                password: "eaadmin",
-                profile: {name: user.name}
-            });
-            if (user.roles.length > 0) {
-                // Need _id of existing user record so this call must come
-                // after `Accounts.createUser` or `Accounts.onCreate`
-                Roles.addUsersToRoles(id, user.roles, Roles.GLOBAL_GROUP);
-            }
-            console.log(user.username + " Account Created");
+          var id = Accounts.createUser({
+            username: user.username,
+            password: "eaadmin",
+            profile: {name: user.name}
+          });
+          if (user.roles.length > 0) {
+            // Need _id of existing user record so this call must come
+            // after `Accounts.createUser` or `Accounts.onCreate`
+            Roles.addUsersToRoles(id, user.roles, Roles.GLOBAL_GROUP);
+          }
+          console.log(user.username + " Account Created");
         }
 
         else if (user.username == "student") {
-            var id = Accounts.createUser({
-                username: user.username,
-                password: "eastudent",
-                profile: {name: user.name}
-            });
-            if (user.roles.length > 0) {
-                // Need _id of existing user record so this call must come
-                // after `Accounts.createUser` or `Accounts.onCreate`
-                Roles.addUsersToRoles(id, user.roles);
-            }
-            console.log(user.username + " Account Created");
+          var id = Accounts.createUser({
+            username: user.username,
+            password: "eastudent",
+            profile: {name: user.name}
+          });
+          if (user.roles.length > 0) {
+            // Need _id of existing user record so this call must come
+            // after `Accounts.createUser` or `Accounts.onCreate`
+            Roles.addUsersToRoles(id, user.roles);
+          }
+          console.log(user.username + " Account Created");
         }
         else if (user.username == "teacher") {
-            var id = Accounts.createUser({
-                username: user.username,
-                password: "eateacher",
-                profile: {name: user.name}
-            });
-            if (user.roles.length > 0) {
-                // Need _id of existing user record so this call must come
-                // after `Accounts.createUser` or `Accounts.onCreate`
-                Roles.addUsersToRoles(id, user.roles);
-            }
-            console.log(user.username + " Account Created");
+          var id = Accounts.createUser({
+            username: user.username,
+            password: "eateacher",
+            profile: {name: user.name}
+          });
+          if (user.roles.length > 0) {
+            // Need _id of existing user record so this call must come
+            // after `Accounts.createUser` or `Accounts.onCreate`
+            Roles.addUsersToRoles(id, user.roles);
+          }
+          console.log(user.username + " Account Created");
         }
       });
     }
@@ -1050,7 +1112,10 @@ if (Meteor.isServer) {
   
 }
 
-// TEMPLATE
+
+/*
+** TEMPLATE
+*/
 //Client Side Information
 if (Meteor.isClient) {
     //Clients are able to access MongoDB Collections with permissions
@@ -1827,6 +1892,7 @@ if (Meteor.isServer) {
     });
 }
 
+
 //Routing Functionality that sets up the URLs
 Router.route('/login');
 
@@ -1839,7 +1905,23 @@ Router.route('/', {
     template: 'home'
 });
 
-Router.route('/newCompanyRegistration', {
+Router.route('/student-home', {
+  waitOn: function () {
+    return Meteor.subscribe('Students');
+  }
+});
+
+Router.route('/teacher-home', {
+  waitOn: function () {
+    return Meteor.subscribe('Teachers');
+  }
+});
+
+
+
+
+Router.route('/newCompanyRegistration',
+{
     template: 'addCompanyForm'
 });
 
