@@ -1,4 +1,9 @@
-//Rolling Yearly Cummitalive Events DONE
+// import { Students } from './private/imports/api/students/students.js';
+// import { Teachers } from './private/imports/api/teachers/teachers.js';
+// import { Courses } from './private/imports/api/courses/courses.js';
+// import { Assignments } from './private/imports/api/assignments/assignments.js';
+
+ //Rolling Yearly Cummitalive Events DONE
 //Q1'14-Q1'15 -> Q2'14-Q2'15 DONE
 //Bill, Mark, Dan, Vince - SMS App Icon
 //Jan 6 - Finalize Report Function and check on outstanding suppliers not yet registered
@@ -10,11 +15,16 @@
 //SimpleSchema.debug = true;
 
 
+//Collection of Student, Teacher, Course, and Assignment objects
+
 //Collection of Company Objects
 CompaniesTest = new Mongo.Collection("companies_Test");
 
 //Collection of Events Objects
 EventsTest = new Mongo.Collection("events_Test");
+
+//Collection of Student Objects
+CoursesCollection = new Mongo.Collection("courses");
 
 //Collection of Student Objects
 StudentCollection = new Mongo.Collection("students");
@@ -1119,11 +1129,51 @@ StudentSchema = new SimpleSchema({
 
 //Course Schema used for validation and templating
 CourseSchema = new SimpleSchema({
-    className: {
+    // _id: {
+    //     type: String,
+    //     //value: Random.id(),
+    //     unique: true,
+    //     // optional: true
+    //     // regEx: SimpleSchema.regEx.Id,
+    //     // autoValue: function() {
+    //     //     if (this.isInsert) {
+    //     //         return this._id;
+    //     //     }
+    //     // }
+    // },
+    courseId: { //Unique course identifier the teacher is associated with
         type: String,
-        max: 100,
+        label: "Course ID",
+        // regEx: SimpleSchema.RegEx.Id,
+        // autoValue: function() {
+        //     return Random.Id();
+        // }
+    },
+    courseName: {
+        type: String,
+        label: "Course Name",
+        max: 100
+    },
+    teacherId: {//Unique teacher identifier the course associated with
+        type: String,
+        label: "Teacher ID",
+        // regEx: SimpleSchema.RegEx.Id,
+        // denyUpdate: true,
+    },
+    studentRoster: {
+        type: [Object],
+        defaultValue: []
 
+    },
+    studentCount: {
+        type: Number,
+        defaultValue: 0,
+    },
+    assignmentRoster: {
+        type: [Object],
+        defaultValue: []
     }
+
 });
 //Assigns Company Collection to specific Company Schema
 CompaniesTest.attachSchema(CompaniesSchema);
@@ -1131,21 +1181,81 @@ CompaniesTest.attachSchema(CompaniesSchema);
 //Assigns Events Collection to specific Company Schema
 EventsTest.attachSchema(EventSchema);
 
+//Assigns Courses Collection to specific Courses Schema
+CoursesCollection.attachSchema(CourseSchema);
+
 
 //Configures the main layout of Web App
 Router.configure({
     layoutTemplate: 'main'
 });
+
+// if (Meteor.isClient){
+//   Meteor.subscribe('Students');
+//   Meteor.subscribe('Teachers');
+//   Meteor.subscribe('Courses');
+//   Meteor.subscribe('Assignments');
+//
+// }
+// TEMPLATE
 //Client Side Information
 if (Meteor.isClient) {
+    AutoForm.debug();
     //Clients are able to access MongoDB Collections with permissions
     Meteor.subscribe('userList');
     Meteor.subscribe('companies_Test');
     Meteor.subscribe('events_Test');
 
+    Meteor.subscribe('courses');
+
+    // AutoForm.hooks({
+    //     insertCompanyForm: {
+    //         onSuccess: function (insert, result) {
+    //             toastr.options = {
+    //                 "closeButton": false,
+    //                 "debug": false,
+    //                 "newestOnTop": false,
+    //                 "progressBar": false,
+    //                 "positionClass": "toast-top-full-width",
+    //                 "preventDuplicates": true,
+    //                 "onclick": null,
+    //                 "showDuration": "300",
+    //                 "hideDuration": "1000",
+    //                 "timeOut": "5000",
+    //                 "extendedTimeOut": "1000",
+    //                 "showEasing": "swing",
+    //                 "hideEasing": "linear",
+    //                 "showMethod": "fadeIn",
+    //                 "hideMethod": "fadeOut"
+    //             };
+    //             if (Roles.userIsInRole(Meteor.userId(), 'supplier')) {
+    //                 var options = {
+    //                     from: "sms@tandlautomatics.com",
+    //                     to: "sms@tandlautomatics.com",
+    //                     subject: "New Company - T&L Supplier Management Application",
+    //                     text: AutoForm.getFieldValue("companyName", "insertCompanyForm") + " has just registered"
+    //                 };
+    //                 Meteor.call("sendEmail", options);
+    //                 toastr.success("Thank you for registering!", "Registration Success");
+    //                 Meteor.logout();
+    //                 Router.go('/');
+    //             }
+    //             else {
+    //                 toastr.success("Thank you for registering!", "Registration Success");
+    //                 Router.go('/companies');
+    //             }
+    //         },
+    //         onError: function (insert, error) {
+    //             console.log(error.reason);
+    //             return error;
+    //         }
+    //     }
+    // });
+
     AutoForm.hooks({
-        insertCompanyForm: {
+        insertCourseForm: {
             onSuccess: function (insert, result) {
+                console.log("insert Course Successful");
                 toastr.options = {
                     "closeButton": false,
                     "debug": false,
@@ -1176,16 +1286,17 @@ if (Meteor.isClient) {
                     Router.go('/');
                 }
                 else {
-                    toastr.success("Thank you for registering!", "Registration Success");
-                    Router.go('/companies');
+                    toastr.success("Course Added!", "No Errors");
+                    Router.go('/courses');
                 }
             },
-            onError: function (insert, error) {
-                console.log(error.reason);
-                return error;
-            }
+            // onError: function (insert, error) {
+            //     console.log(error.reason);
+            //     return error;
+            // }
         }
     });
+
     AutoForm.hooks({
         updateCompanyForm: {
             before: {
@@ -1296,7 +1407,7 @@ if (Meteor.isClient) {
                     alert(error.reason);
                 } else {
                     if (usernameVar == 'admin') {
-                        Router.go('/companies');
+                        Router.go('courses');
                     }
                     else if (usernameVar == 'supplier') {
                         Router.go('/companies/newCompany')
@@ -1334,7 +1445,73 @@ if (Meteor.isClient) {
                 Router.go('login');
             }
         }),
-        Template.companies.events({
+        // Template.companies.events({
+        //     'click .btn-warning': function () {
+        //         toastr.options = {
+        //             "closeButton": false,
+        //             "debug": false,
+        //             "newestOnTop": false,
+        //             "progressBar": false,
+        //             "positionClass": "toast-top-right",
+        //             "preventDuplicates": false,
+        //             "onclick": null,
+        //             "showDuration": "300",
+        //             "hideDuration": "1000",
+        //             "timeOut": "5000",
+        //             "extendedTimeOut": "1000",
+        //             "showEasing": "swing",
+        //             "hideEasing": "linear",
+        //             "showMethod": "fadeIn",
+        //             "hideMethod": "fadeOut"
+        //         };
+        //         var html = Blaze.toHTML(Template.registerEmail);
+        //         var options = {
+        //             from: 'sms@tandlautomatics.com',
+        //             to: document.getElementById("emailInvite").value,
+        //             replyTo: 'sms@tandlautomatics.com',
+        //             subject: 'Registration Request - T&L Supplier Management Application',
+        //             html: html
+        //         };
+        //         Meteor.call("sendEmail", options);
+        //         toastr.info("Invitation Sent");
+        //     },
+        //     'click .btn-info': function (e) {
+        //         var companyID = this._id;
+        //         Session.set('selectedCompany', companyID);
+        //         e.stopPropagation();
+        //         var confirm = window.confirm("Send All Feedback?");
+        //         if (confirm) {
+        //             var companyList = CompaniesTest.find().fetch();
+        //             var start = new Date();
+        //             var end = new Date(new Date(start).setMonth(start.getMonth() - 12));
+        //             _.each(companyList, function (company) {
+        //                 var selectedCompany = company._id;
+        //                 var num = 0;
+        //                 num += EventsTest.find({
+        //                     companyName: company.companyName,
+        //                     eventDate: {$lte: start, $gte: end},
+        //                     statusOption: "0"
+        //                 }, {sort: {statusOption: -1, eventDate: -1}}).count();
+        //                 num += EventsTest.find({
+        //                     companyName: company.companyName,
+        //                     eventDate: {$lte: start, $gte: end},
+        //                     statusOption: "1"
+        //                 }, {sort: {statusOption: -1, eventDate: -1}}).count();
+        //                 console.log(company.companyName + " has " + num + " red/yellow events");
+        //                 Session.set('eventNumber', num);
+        //                 var data = {
+        //                     eventItems: EventsTest.find({
+        //                         companyName: company.companyName,
+        //                         eventDate: {$lte: start, $gte: end}
+        //                     }, {sort: {statusOption: -1, eventDate: -1}}).fetch()
+        //                 }
+        //                 var html = Blaze.toHTMLWithData(Template.feedbackEmail, data);
+        //                 Meteor.call('sendFeedbackEmail', selectedCompany, html);
+        //             });
+        //         }
+        //     }
+        // }),
+        Template.courses.events({
             'click .btn-warning': function () {
                 toastr.options = {
                     "closeButton": false,
@@ -1400,23 +1577,104 @@ if (Meteor.isClient) {
                 }
             }
         }),
-        Template.companies.helpers({
+        // Template.companies.helpers({
+        //     'redirect': function () {
+        //         if (Meteor.userId == null) {
+        //             return Router.go("/");
+        //         }
+        //     }
+        // }),
+        Template.courses.helpers({
             'redirect': function () {
                 if (Meteor.userId == null) {
                     return Router.go("/");
                 }
             }
         }),
-        Template.companyListDisplay.events({
-            'click .company': function (e) {
+        // Template.companyListDisplay.events({
+        //     'click .company': function (e) {
+        //         e.stopPropagation();
+        //         var companyID = this._id;
+        //         if (companyID == null) {
+        //             // Router.go("/companies");
+        //             Router.go("/companies");
+        //         }
+        //         else {
+        //             Router.go("/companies/details/" + this._id);
+        //             Session.set('selectedCompany', companyID);
+        //         }
+        //     },
+        //     'click .btn-warning': function (e) {
+        //         var companyID = this._id;
+        //         Session.set('selectedCompany', companyID);
+        //         e.stopPropagation();
+        //         Router.go("/companies/edit/" + companyID);
+        //     },
+        //     'click .btn-danger': function (e) {
+        //         var companyID = this._id;
+        //         Session.set('selectedCompany', companyID);
+        //         e.stopPropagation();
+        //         var selectedCompany = Session.get('selectedCompany');
+        //         var confirm = window.confirm("Delete this Company?");
+        //         if (confirm) {
+        //             Meteor.call('removeCompanyData', selectedCompany);
+        //         }
+        //     },
+        //     'click .btn-info': function (e) {
+        //         var companyID = this._id;
+        //         Session.set('selectedCompany', companyID);
+        //         e.stopPropagation();
+        //         var selectedCompany = Session.get('selectedCompany');
+        //         console.log(selectedCompany);
+        //         var confirm = window.confirm("Send Feedback?");
+        //         if (confirm) {
+        //             var start = new Date();
+        //             var start1 = moment(start);
+        //             var end = new Date(new Date(start).setMonth(start.getMonth() - 12));
+        //             var end1 = moment(end);
+        //             var num = 0;
+        //             num = num + EventsTest.find({
+        //                     companyName: this.companyName,
+        //                     eventDate: {$lte: start, $gte: end},
+        //                     statusOption: "0"
+        //                 }, {sort: {statusOption: -1, eventDate: -1}}).count();
+        //             num = num + EventsTest.find({
+        //                     companyName: this.companyName,
+        //                     eventDate: {$lte: start, $gte: end},
+        //                     statusOption: "1"
+        //                 }, {sort: {statusOption: -1, eventDate: -1}}).count();
+        //             Session.set('eventNumber', num);
+        //             console.log("Number of red/yellow events: " + Session.get('eventNumber'));
+        //             var dataContext = {
+        //                 eventItems: EventsTest.find({
+        //                     companyName: this.companyName,
+        //                     eventDate: {$lte: start, $gte: end}
+        //                 }, {sort: {statusOption: -1, eventDate: -1}}).fetch()
+        //             };
+        //             var html = Blaze.toHTMLWithData(Template.feedbackEmail, dataContext);
+        //             var data = {
+        //                 event: EventsTest.find({companyName: this.companyName}, {sort: {statusOption: -1}}).fetch()
+        //             };
+        //             Meteor.call('sendFeedbackEmail', selectedCompany, html);
+        //         }
+        //     }
+        // }),
+        // Template.companyListDisplay.helpers({
+        //     'company': function () {
+        //         return CompaniesTest.find({}, {sort: {companyName: 1}});
+        //     }
+        // }),
+        Template.courseListDisplay.events({
+            //Row Detail Button
+            'click .course': function (e) {
                 e.stopPropagation();
-                var companyID = this._id;
-                if (companyID == null) {
-                    Router.go("/companies");
+                var courseID = this._id;
+                if (courseID == null) {
+                    Router.go("courses");
                 }
                 else {
-                    Router.go("/companies/details/" + this._id);
-                    Session.set('selectedCompany', companyID);
+                    Router.go("/courses/details/" + this._id);
+                    Session.set('selectedCourse', courseID);
                 }
             },
             'click .btn-warning': function (e) {
@@ -1425,14 +1683,16 @@ if (Meteor.isClient) {
                 e.stopPropagation();
                 Router.go("/companies/edit/" + companyID);
             },
+
+            //Delete Button
             'click .btn-danger': function (e) {
-                var companyID = this._id;
-                Session.set('selectedCompany', companyID);
+                var courseID = this._id;
+                Session.set('selectedCourse', courseID);
                 e.stopPropagation();
-                var selectedCompany = Session.get('selectedCompany');
-                var confirm = window.confirm("Delete this Company?");
+                var selectedCourse = Session.get('selectedCourse');
+                var confirm = window.confirm("Delete this Course?");
                 if (confirm) {
-                    Meteor.call('removeCompanyData', selectedCompany);
+                    Meteor.call('removeCourseData', selectedCourse);
                 }
             },
             'click .btn-info': function (e) {
@@ -1474,40 +1734,95 @@ if (Meteor.isClient) {
                 }
             }
         }),
-        Template.companyListDisplay.helpers({
-            'company': function () {
-                return CompaniesTest.find({}, {sort: {companyName: 1}});
+        Template.courseListDisplay.helpers({
+            'course': function () {
+                return CoursesCollection.find({}, {sort: {courseName: 1}});
             }
         }),
-        Template.detailCompany.helpers({
+
+        // Template.detailCompany.helpers({
+        //     '[name=insertCompanyForm]': function () {
+        //         return CompaniesTest.findOne({_id: this._id});
+        //     }
+        // }),
+
+        Template.detailCourse.helpers({
             '[name=insertCompanyForm]': function () {
                 return CompaniesTest.findOne({_id: this._id});
             }
         }),
+
         Template.editCompany.helpers({
             '[name=updateCompanyForm]': function () {
                 return CompaniesTest.findOne({_id: this._id});
             }
         }),
-        Template.eventListDisplay.events({
-            'click .event': function (e) {
+        // Template.eventListDisplay.events({
+        //     'click .event': function (e) {
+        //         e.stopPropagation();
+        //         var eventID = this._id;
+        //         Router.go("/events/details/" + this._id);
+        //         Session.set('selectedEvent', eventID);
+        //     },
+        //     'click .btn-danger': function (e) {
+        //         var eventID = this._id;
+        //         Session.set('selectedEvent', eventID);
+        //         e.stopPropagation();
+        //         var selectedEvent = Session.get('selectedEvent');
+        //         var confirm = window.confirm("Delete this Event?");
+        //         if (confirm) {
+        //             Meteor.call('removeEventData', selectedEvent);
+        //         }
+        //     }
+        // }),
+        Template.assignmentListDisplay.events({
+            'click .assignment': function (e) {
                 e.stopPropagation();
-                var eventID = this._id;
-                Router.go("/events/details/" + this._id);
-                Session.set('selectedEvent', eventID);
+                var assignmentID = this._id;
+                Router.go("/assignment/details/" + this._id);
+                Session.set('selectedEvent', assignmentID);
             },
             'click .btn-danger': function (e) {
-                var eventID = this._id;
-                Session.set('selectedEvent', eventID);
+                var assignmentID = this._id;
+                Session.set('selectedEvent', assignmentID);
                 e.stopPropagation();
-                var selectedEvent = Session.get('selectedEvent');
-                var confirm = window.confirm("Delete this Event?");
+                var selectedAssignment = Session.get('selectedAssignment');
+                var confirm = window.confirm("Delete this Assignment?");
                 if (confirm) {
-                    Meteor.call('removeEventData', selectedEvent);
+                    Meteor.call('removeEventData', selectedAssignment);
                 }
             }
         }),
-        Template.eventListDisplay.helpers({
+        // Template.eventListDisplay.helpers({
+        //     'event': function () {
+        //         return EventsTest.find({}, {sort: {statusOption: -1, eventDate: 1}}).map(function (document, index) {
+        //             document.index = index + 1;
+        //             return document;
+        //         });
+        //     },
+        //     'eventBad': function () {
+        //         return (EventsTest.find({_id: this._id}, {sort: {statusOption: 1}}).fetch()[0].statusOption == "1");
+        //     },
+        //     'eventMid': function () {
+        //         return (EventsTest.find({_id: this._id}, {sort: {statusOption: 1}}).fetch()[0].statusOption == "0");
+        //     },
+        //     'eventGood': function () {
+        //         return (EventsTest.find({_id: this._id}, {sort: {statusOption: 1}}).fetch()[0].statusOption == "-1");
+        //     },
+        //     'statusOptionConverter': function () {
+        //         if (EventsTest.find({_id: this._id}, {sort: {statusOption: 1}}).fetch()[0].statusOption == "1") {
+        //             return "Open";
+        //         }
+        //         else if (EventsTest.find({_id: this._id}, {sort: {statusOption: 1}}).fetch()[0].statusOption == "0") {
+        //             return "Pending";
+        //         }
+        //         else {
+        //             return "Closed";
+        //         }
+        //     }
+        // }),
+
+        Template.assignmentListDisplay.helpers({
             'event': function () {
                 return EventsTest.find({}, {sort: {statusOption: -1, eventDate: 1}}).map(function (document, index) {
                     document.index = index + 1;
@@ -1535,6 +1850,7 @@ if (Meteor.isClient) {
                 }
             }
         }),
+
         Template.insertEventForm.helpers({
             'showDelivery': function () {
                 return (AutoForm.getFieldValue("eventType") == "Delivery");
@@ -1706,6 +2022,7 @@ if (Meteor.isServer) {
     // });
     Meteor.startup(function () {
         console.log("Server Side Startup Initialized");
+        //console.log(Random.id() + ": is the SimpleSchema.RegEx.Id");
         // SyncedCron.start();
         //EMAIL 1
         process.env.MAIL_URL = 'smtp://postmaster%40sandbox9a11769c25e04579a3d65d9e8f4e20cd.mailgun.org:b54cb40a370534e4f1ff467f7e836cf3@smtp.mailgun.org:587';
@@ -1723,7 +2040,7 @@ if (Meteor.isServer) {
                 {name: "Employee User", username: "employee", roles: ['employee']},
                 {name: "Supplier User", username: "supplier", roles: ['supplier']},
                 {name: "Teacher User", username: "teacher", roles: ['admin', 'teacher']},
-                {name: "Student User", username: "student", roles: ['admin', 'student']}
+                {name: "Student User", username: "student", roles: ['student']}
             ];
             _.each(users, function (user) {
                 if (user.username == "admin") {
@@ -1816,6 +2133,16 @@ if (Meteor.isServer) {
         }
     });
 
+    Meteor.publish('courses', function () {
+        if (Roles.userIsInRole(this.userId, ['admin', 'employee', 'teacher', 'student'])) {
+            var currentUserID = this.userId;
+            return CoursesCollection.find({});
+        }
+        else {
+            this.stop();
+        }
+    });
+
     Meteor.publish('userList', function () {
         if (Roles.userIsInRole(this.userId, ['admin'])) {
             var currentUserID = this.userId;
@@ -1841,6 +2168,7 @@ if (Meteor.isServer) {
             return true;
         }
     });
+
     EventsTest.allow({
         'insert': function (userId, doc) {
             return true;
@@ -1852,11 +2180,31 @@ if (Meteor.isServer) {
             return true;
         }
     });
+    CoursesCollection.allow({
+        'insert': function (userId, doc) {
+            return true;
+        },
+        'update': function (userId, doc) {
+            return true;
+        },
+        'remove': function (userId, doc) {
+            return true;
+        }
+    });
     Meteor.methods({
-        'removeCompanyData': function (selectedCompany) {
+        // 'removeCompanyData': function (selectedCompany) {
+        //     var currentUserID = Meteor.userId();
+        //     if (Roles.userIsInRole(currentUserID, 'admin')) {
+        //         CompaniesTest.remove({_id: selectedCompany});
+        //     }
+        // },
+
+        'removeCourseData': function (selectedCourse) {
             var currentUserID = Meteor.userId();
-            if (Roles.userIsInRole(currentUserID, 'admin')) {
-                CompaniesTest.remove({_id: selectedCompany});
+            console.log("CourseID: " + selectedCourse);
+            if (Roles.userIsInRole(currentUserID, ['admin', 'teacher'])) {
+                CoursesCollection.remove({_id: selectedCourse});
+                console.log("Removed Course Successfully");
             }
         },
 
@@ -1928,32 +2276,60 @@ Router.route('/newCompanyRegistration', {
     template: 'addCompanyForm'
 });
 
-Router.route('/companies', {
+// Router.route('/companies', {
+//     waitOn: function () {
+//         // waitOn makes sure that this publication is ready before rendering your template
+//         return Meteor.subscribe("companies_Test");
+//     }
+// });
+Router.route('/courses', {
     waitOn: function () {
         // waitOn makes sure that this publication is ready before rendering your template
-        return Meteor.subscribe("companies_Test");
+        return Meteor.subscribe("courses");
     }
 });
 
-Router.route('/companies/newCompany', {
-    template: 'addCompanyForm',
+// Router.route('/companies/newCompany', {
+//     template: 'addCompanyForm',
+//     data: function () {
+//         // waitOn makes sure that this publication is ready before rendering your template
+//         return Meteor.subscribe("companies_Test", this._id);
+//     }
+// });
+
+Router.route('/courses/newCourse', {
+    template: 'addCourseForm',
     data: function () {
         // waitOn makes sure that this publication is ready before rendering your template
-        return Meteor.subscribe("companies_Test", this._id);
+        return Meteor.subscribe("courses", this._id);
     }
 });
 
-Router.route('/companies/details/:_id', {
-    template: 'detailCompany',
+// Router.route('/companies/details/:_id', {
+//     template: 'detailCompany',
+//     waitOn: function () {
+//         // waitOn makes sure that this publication is ready before rendering your template
+//         return Meteor.subscribe("companies_Test");
+//     },
+//     data: function () {
+//         var currentList = this.params._id;
+//         return CompaniesTest.findOne({_id: currentList});
+//     }
+// });
+
+Router.route('/courses/details/:_id', {
+    template: 'detailCourse',
     waitOn: function () {
         // waitOn makes sure that this publication is ready before rendering your template
-        return Meteor.subscribe("companies_Test");
+        return Meteor.subscribe("courses");
     },
     data: function () {
         var currentList = this.params._id;
-        return CompaniesTest.findOne({_id: currentList});
+        return CoursesCollection.findOne({_id: currentList});
     }
 });
+
+
 
 Router.route('/companies/edit/:_id', {
     template: 'editCompany',
