@@ -3,6 +3,7 @@
 // import { Courses } from './private/imports/api/courses/courses.js';
 // import { Assignments } from './private/imports/api/assignments/assignments.js';
 
+
  //Rolling Yearly Cummitalive Events DONE
 //Q1'14-Q1'15 -> Q2'14-Q2'15 DONE
 //Bill, Mark, Dan, Vince - SMS App Icon
@@ -14,8 +15,233 @@
 //This is to debug the schema's errors from validation
 //SimpleSchema.debug = true;
 
-
 //Collection of Student, Teacher, Course, and Assignment objects
+// StudentsCollection = new Mongo.Collection('Students');
+// TeachersCollection = new Mongo.Collection('Teachers');
+// CoursesCollection = new Mongo.Collection('Courses');
+// AssignmentsCollection = new Mongo.Collection('Assignments');
+//
+// Students.schema = new SimpleSchema({
+//   _id: { //Unique student/user identifier within the system (Persistance of account between schools)
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   studentId: { //Unique student identifier relative to the school
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     label: "School defined student ID",
+//     denyUpdate: false,
+//   },
+//   schoolId: { //Unique school identifier the student associated with
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: false,
+//   },
+//   firstName: {
+//     type: String,
+//     label: "First name",
+//     max: 25,
+//   },
+//   lastName: {
+//     type: String,
+//     label: "Last name",
+//     max: 35,
+//   },
+//   password: {
+//     type: String,
+//     max: 30,
+//     //Encryption / Hashing ??
+//   },
+//   email: {
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Email,
+//     max: 50,
+//   },
+//   points: {
+//     type: Number,
+//     label: "Current number of acquired points",
+//     defaultValue: 0,
+//   },
+//   courseSchedule: { //Courses a student is currently enrolled in; cleared when course complete
+//       type: [Courses],
+//   }
+// });
+//
+// Teachers.schema = new SimpleSchema({
+//   _id: { //Unique school identifier the teacher associated with
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   teacherId: {//Unique teacher identifier the course associated with
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: false,
+//   },
+//   schoolId: { //Unique school identifier the teacher associated with
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: false,
+//   },
+//   formalName: {
+//     type: String,
+//     label: "Name referred to by students",
+//
+//   },
+//   firstName: {
+//     type: String,
+//     label: "First name",
+//   },
+//   lastName: {
+//     type: String,
+//     label: "Last name",
+//     max: 35,
+//   },
+//   password: {
+//     type: String,
+//     max: 30,
+//     //Encryption / Hashing ??
+//   },
+//   email: {
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Email,
+//     max: 50,
+//   },
+//   courses: {
+//     type: [Courses],
+//     label: "Courses taught",
+//     minCount: 1,
+//   },
+//   classroom: { type: [Students], },
+// });
+//
+// Courses.schema = new SimpleSchema({
+//   name: { type: String, },
+//   _id: {
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   courseId: { //Unique course identifier the teacher is associated with
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   schoolId: { //Unique school identifier the course associated with
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   teacherId: {//Unique teacher identifier the course associated with
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   students: { type: [Students], },
+//   studentCount: {
+//     type: Number,
+//     defaultValue: 0,
+//   },
+//   assignments: {
+//     type: [Assignments],
+//     minCount: 1,
+//   },
+// });
+//
+// Assignments.schema = new SimpleSchema({
+//   _id: {
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   courseId: {
+//     type: String,
+//     regEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: true,
+//   },
+//   submitterId: {
+//     type: String,
+//     egEx: SimpleSchema.RegEx.Id,
+//     denyUpdate: false,
+//   },
+//   name: { type: String, },
+//   startDate: {
+//     type: Date,
+//   },
+//   dueDate: {
+//     type: Date,
+//   },
+//   submissionDate: {
+//     type: Date,
+//   },
+//   weight: {
+//     type: Number,
+//   },
+//   grade: {
+//     type: Number,
+//   },
+//   studentComments: {
+//     type: String,
+//     max: 500,
+//   },
+//   teacherComments: {
+//     type: String,
+//     max: 500,
+//   },
+// });
+//
+// StudentsCollection.attachSchema(Students.schema);
+// TeachersCollection.attachSchema(Teachers.schema);
+// CoursesCollection.attachSchema(Courses.schema);
+// AssignmentsCollection.attachSchema(Assignments.schema);
+//
+// StudentsCollection.publicFields = {
+//   _id: 1,
+//   studentId: 1,
+//   schoolId: 1,
+//   firstName: 1,
+//   lastName: 1,
+//   email: 1,
+//   points: 1,
+//   courseSchedule: 1,
+// };
+//
+// TeachersCollection.publicFields = {
+//   teacherId: 1,
+//   schoolId: 1,
+//   formalName: 1,
+//   email: 1,
+//   courses: 1,
+//   classroom: 1,
+// };
+//
+// CoursesCollection.publicFields = {
+//   name: 1,
+//   courseId: 1,
+//   teacherId: 1,
+//   studentCount: 1,
+//   assignments: 1,
+// };
+//
+// AssignmentsCollection.publicFields = {
+//   _id: 1,
+//   courseId: 1,
+//   name: 1,
+//   startDate: 1,
+//   dueDate: 1,
+//   studentComments: 1,
+//   teacherComments: 1,
+//   grade: 1,
+//   weight: 1,
+// };
+
+
+/*
+* START
+** TEMPLATE
+** DB & SCHEMA
+*/
 
 //Collection of Company Objects
 CompaniesTest = new Mongo.Collection("companies_Test");
@@ -1180,24 +1406,120 @@ CompaniesTest.attachSchema(CompaniesSchema);
 
 //Assigns Events Collection to specific Company Schema
 EventsTest.attachSchema(EventSchema);
+/*
+** END
+*/
 
 //Assigns Courses Collection to specific Courses Schema
 CoursesCollection.attachSchema(CourseSchema);
 
 
+/*
+** EA_APP
+*/
 //Configures the main layout of Web App
+
 Router.configure({
     layoutTemplate: 'main'
 });
 
-// if (Meteor.isClient){
-//   Meteor.subscribe('Students');
-//   Meteor.subscribe('Teachers');
-//   Meteor.subscribe('Courses');
-//   Meteor.subscribe('Assignments');
-//
-// }
-// TEMPLATE
+if (Meteor.isClient){
+  Meteor.subscribe('Students');
+  Meteor.subscribe('Teachers');
+  Meteor.subscribe('Courses');
+  Meteor.subscribe('Assignments');
+  
+  Template.login.events({
+    'submit form': function (event) {
+      console.log("Submit Button clicked");
+      event.preventDefault();
+      var usernameVar = event.target.loginUsername.value;
+      var passwordVar = event.target.loginPassword.value;
+      Meteor.loginWithPassword(usernameVar, passwordVar, function (error) {
+        if (error) {
+          alert(error.reason);
+        } else {
+          if (usernameVar == 'admin') {
+              Router.go('/admin');
+          }
+          else if (usernameVar == 'student') {
+              Router.go('/student-home')
+          }
+          else if (usernameVar == 'teacher') {
+              Router.go('/teacher-home');
+          }
+        }
+      });
+    }
+  })
+  
+}
+
+if (Meteor.isServer) {
+  Meteor.startup(function () {
+    console.log("Server Side Startup Initialized");
+    console.log("Active Users: " + Meteor.users.findOne());
+    if (!Meteor.users.findOne()) {
+      console.log("Creating User Accounts");
+      var users = [
+        {name: "Admin User", username: "admin", roles: ['admin']},
+        {name: "Teacher User", username: "teacher", roles: ['admin', 'teacher']},
+        {name: "Student User", username: "student", roles: ['admin', 'student']},
+      ];
+      _.each(users, function (user) {
+        if (user.username == "admin") {
+          var id = Accounts.createUser({
+            username: user.username,
+            password: "eaadmin",
+            profile: {name: user.name}
+          });
+          if (user.roles.length > 0) {
+            // Need _id of existing user record so this call must come
+            // after `Accounts.createUser` or `Accounts.onCreate`
+            Roles.addUsersToRoles(id, user.roles, Roles.GLOBAL_GROUP);
+          }
+          console.log(user.username + " Account Created");
+        }
+
+        else if (user.username == "student") {
+          var id = Accounts.createUser({
+            username: user.username,
+            password: "eastudent",
+            profile: {name: user.name}
+          });
+          if (user.roles.length > 0) {
+            // Need _id of existing user record so this call must come
+            // after `Accounts.createUser` or `Accounts.onCreate`
+            Roles.addUsersToRoles(id, user.roles);
+          }
+          console.log(user.username + " Account Created");
+        }
+        else if (user.username == "teacher") {
+          var id = Accounts.createUser({
+            username: user.username,
+            password: "eateacher",
+            profile: {name: user.name}
+          });
+          if (user.roles.length > 0) {
+            // Need _id of existing user record so this call must come
+            // after `Accounts.createUser` or `Accounts.onCreate`
+            Roles.addUsersToRoles(id, user.roles);
+          }
+          console.log(user.username + " Account Created");
+        }
+      });
+    }
+    console.log("Current Accounts Available: " + Meteor.users.find().fetch());
+    console.log("Server Startup Initialization Complete");
+  });
+  
+  
+}
+
+
+/*
+** TEMPLATE
+*/
 //Client Side Information
 if (Meteor.isClient) {
     AutoForm.debug();
@@ -1999,31 +2321,8 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-    // Meteor.setInterval(function () {
-    //     console.log("test");
-    // }, 60000);
-    //
-    // SyncedCron.config({
-    //     collectionName: "emailJobs"
-    // });
-    //
-    // SyncedCron.add({
-    //     name: "Email Job",
-    //     'schedule': function (parser) {
-    //         return parser.text("Every 10 Second");
-    //     },
-    //     'job': function (intendedAt) {
-    //         var today = new Date();
-    //         console.log("This is it!");
-    //         //console.log(SyncedChron._collection.findOne());
-    //         //SyncedCron.emailJobs.find({}).fetch();
-    //         //Email.send();
-    //     }
-    // });
     Meteor.startup(function () {
-        console.log("Server Side Startup Initialized");
-        //console.log(Random.id() + ": is the SimpleSchema.RegEx.Id");
-        // SyncedCron.start();
+        console.log("Server Side Startup 2 Initialized");
         //EMAIL 1
         process.env.MAIL_URL = 'smtp://postmaster%40sandbox9a11769c25e04579a3d65d9e8f4e20cd.mailgun.org:b54cb40a370534e4f1ff467f7e836cf3@smtp.mailgun.org:587';
         //BACKUP EMAIL 2
@@ -2111,7 +2410,7 @@ if (Meteor.isServer) {
                 }
             });
         }
-        console.log("Server Side Startup Finished");
+        console.log("Server Side Startup 2 Finished");
     });
     Meteor.publish('companies_Test', function () {
         if (Roles.userIsInRole(this.userId, ['admin', 'employee'])) {
@@ -2260,6 +2559,7 @@ if (Meteor.isServer) {
     });
 }
 
+
 //Routing Functionality that sets up the URLs
 Router.route('/login');
 
@@ -2272,7 +2572,23 @@ Router.route('/', {
     template: 'home'
 });
 
-Router.route('/newCompanyRegistration', {
+Router.route('/student-home', {
+  waitOn: function () {
+    return Meteor.subscribe('Students');
+  }
+});
+
+Router.route('/teacher-home', {
+  waitOn: function () {
+    return Meteor.subscribe('Teachers');
+  }
+});
+
+
+
+
+Router.route('/newCompanyRegistration',
+{
     template: 'addCompanyForm'
 });
 
